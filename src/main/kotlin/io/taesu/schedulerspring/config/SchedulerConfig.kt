@@ -2,6 +2,7 @@ package io.taesu.schedulerspring.config
 
 import net.javacrumbs.shedlock.core.LockProvider
 import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider
+import net.javacrumbs.shedlock.provider.jdbctemplate.JdbcTemplateLockProvider.ColumnNames
 import net.javacrumbs.shedlock.spring.annotation.EnableSchedulerLock
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,6 +32,7 @@ class SchedulerConfig: SchedulingConfigurer {
             taskRegistrar.setTaskScheduler(this)
             setAwaitTerminationSeconds(300)
             setWaitForTasksToCompleteOnShutdown(true)
+            this.setErrorHandler(SchedulerErrorHandler())
         }
     }
 
@@ -39,6 +41,8 @@ class SchedulerConfig: SchedulingConfigurer {
         return JdbcTemplateLockProvider.Configuration.builder()
             .withJdbcTemplate(JdbcTemplate(dataSource))
             .usingDbTime()
+            // .withTableName("shedlock")
+            // .withColumnNames(ColumnNames("name", "lock_until", "locked_at", "locked_by"))
             .build()
             .let(::JdbcTemplateLockProvider)
     }
